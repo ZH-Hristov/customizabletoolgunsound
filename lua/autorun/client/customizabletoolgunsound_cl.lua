@@ -1,4 +1,4 @@
-CreateClientConVar("custom_toolgun_sound", "sound/weapons/airboat/airboat_gun_lastshot1.wav", true, false, "What toolgun sound you should use.")
+CreateClientConVar("custom_toolgun_sound", "weapons/airboat/airboat_gun_lastshot1.wav", true, false, "What toolgun sound you should use.")
 
 local supportedFileTypes = {
     [".mp3"] = true,
@@ -30,7 +30,9 @@ local function sendSound()
         return
     end
 
-    local maxlength = GetConVar("custom_toolgun_sound_length"):GetFloat()
+    local maxlength = GetConVar("custom_toolgun_sound_length")
+    maxlength = (maxlength:GetFloat() or 5)
+
     if SoundDuration(snd) > maxlength then
         notification.AddLegacy("Sound must not be longer than "..maxlength.."!", NOTIFY_ERROR, 3)
         return
