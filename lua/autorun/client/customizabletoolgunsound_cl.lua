@@ -1,4 +1,5 @@
 CreateClientConVar("custom_toolgun_sound", "weapons/airboat/airboat_gun_lastshot1.wav", true, false, "What toolgun sound you should use.")
+CreateConVar("custom_toolgun_sound_length", 3, FCVAR_REPLICATED, "Max length for toolgun sounds")
 
 local supportedFileTypes = {
     [".mp3"] = true,
@@ -43,9 +44,38 @@ local function sendSound()
     net.SendToServer()
 end
 
+local function applyToolgunSnd(ply)
+    local cs = ply.Cust_Tlgn_Snd
+    
+    if not cs then return end
+
+    timer.Simple(0.1, function()
+        local wep = ply:GetWeapon("gmod_tool")
+
+        if not wep then return end
+        wep.ShootSound = cs
+    end)
+end
+
 net.Receive("CUST_TG_SND", function()
     sendSound()
 end)
+
+net.Receive("CUST_TG_SND_BROADCAST", function()
+    local ply = net.ReadEntity()
+    local snd = net.ReadString()
+
+    ply.Cust_Tlgn_Snd = snd
+    applyToolgunSnd(ply)
+end)
+
+gameevent.Listen( "player_spawn" )
+hook.Add( "player_spawn", "CustomToolgunSound_ApplyCL", function( data ) 
+	local id = data.userid
+    local ply = Player(id)
+
+    applyToolgunSnd(ply)
+end )
 
 cvars.AddChangeCallback("custom_toolgun_sound", function(cvar, old, new)
     sendSound()

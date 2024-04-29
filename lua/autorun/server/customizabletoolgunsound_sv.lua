@@ -1,10 +1,18 @@
 CreateConVar("custom_toolgun_sound_length", 3, FCVAR_REPLICATED, "Max length for toolgun sounds")
 
 util.AddNetworkString("CUST_TG_SND")
+util.AddNetworkString("CUST_TG_SND_BROADCAST")
 
 local function requestString(ply)
     net.Start("CUST_TG_SND")
     net.Send(ply)
+end
+
+local function broadcastSnd(ply)
+    net.Start("CUST_TG_SND_BROADCAST")
+    net.WriteEntity(ply)
+    net.WriteString(ply.Cust_Tlgn_Snd)
+    net.Broadcast()
 end
 
 local function applyToolgunSnd(ply)
@@ -23,7 +31,11 @@ end
 local function setToolgunSnd(ply, snd)
     ply.Cust_Tlgn_Snd = snd
 
-    applyToolgunSnd(ply)
+    if game.SinglePlayer() then
+        applyToolgunSnd(ply)
+    else
+        broadcastSnd(ply)
+    end
 end
 
 net.Receive("CUST_TG_SND", function(len, ply)
